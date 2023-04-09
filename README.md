@@ -3,4 +3,4 @@
 The project overview can be found [here](https://github.com/cu-ecen-aeld/final-project-ritikar97/wiki/Project-Overview).
 
 ## Schedule
-The schedule for the project can be found[here](https://github.com/users/hgajapathy/projects/5).
+The schedule for the project can be found [here](https://github.com/users/hgajapathy/projects/5).
