@@ -1,0 +1,1 @@
+cmd_/home/ritikar97/Desktop/AESD/final_project/bme280-driver/bme280.ko := ld -r  -m elf_x86_64 -z noexecstack   --build-id=sha1  -T scripts/module.lds -o /home/ritikar97/Desktop/AESD/final_project/bme280-driver/bme280.ko /home/ritikar97/Desktop/AESD/final_project/bme280-driver/bme280.o /home/ritikar97/Desktop/AESD/final_project/bme280-driver/bme280.mod.o;  true

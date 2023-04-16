@@ -1,0 +1,1 @@
+cmd_/home/ritikar97/Desktop/AESD/final_project/bme280-driver/Module.symvers := sed 's/\.ko$$/\.o/' /home/ritikar97/Desktop/AESD/final_project/bme280-driver/modules.order | scripts/mod/modpost -m -a  -o /home/ritikar97/Desktop/AESD/final_project/bme280-driver/Module.symvers -e -i Module.symvers   -T -

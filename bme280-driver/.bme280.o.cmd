@@ -1,0 +1,1 @@
+cmd_/home/ritikar97/Desktop/AESD/final_project/bme280-driver/bme280.o := ld  -m elf_x86_64 -z noexecstack     -r -o /home/ritikar97/Desktop/AESD/final_project/bme280-driver/bme280.o /home/ritikar97/Desktop/AESD/final_project/bme280-driver/main.o
