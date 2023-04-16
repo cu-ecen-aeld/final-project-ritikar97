@@ -16,7 +16,6 @@
      /* This one if debugging is on, and kernel space */
 #    define PDEBUG(fmt, args...) printk( KERN_DEBUG "bme280: " fmt, ## args)
 #include <linux/types.h>
-
 #  else
      /* This one for user space */
 #    define PDEBUG(fmt, args...) fprintf(stderr, fmt, ## args)
@@ -31,6 +30,8 @@
 #include <linux/i2c.h>
 
 #define CALIB_DATA_PT_LEN (24)
+#define LONG_SIGNED_INT_NUM (11)
+
 // Only for Temperature and Pressure
 enum calib_data_digits
 {

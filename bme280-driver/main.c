@@ -35,6 +35,7 @@
 #define OSRS_P_LSB (2) 
 #define OSRS_T_LSB (5)
 
+
 int bme280_major =   0; // use dynamic major
 int bme280_minor =   0;
 
@@ -121,25 +122,23 @@ static long unsigned int bme280_temp_read(void)
 ssize_t bme280_read(struct file *filp, char __user *buf, size_t count,
                 loff_t *f_pos)
 {
-    ssize_t num_bytes_read = 20;
+    ssize_t num_bytes_read = LONG_SIGNED_INT_NUM;
     ssize_t retval = 0;
 
     long signed int bme280_temperature_val = bme280_temp_read();
 
-    char temp[20];
+    char temp[LONG_SIGNED_INT_NUM];
 
     sprintf(temp, "%ld", bme280_temperature_val);
 
     // Copy the entry from the specified offset to the user-provided buffer
-    if(copy_to_user(buf, temp, 20))
+    if(copy_to_user(buf, temp, LONG_SIGNED_INT_NUM))
     {
         retval = -EFAULT;
         goto exit_gracefully;
     }
 
     PDEBUG("Number of bytes read = %ld\n", num_bytes_read);
-
-    *f_pos += num_bytes_read; //todo - do I need this?
 
     retval = num_bytes_read;
 
