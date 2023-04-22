@@ -1,7 +1,6 @@
 # References : ../examples/autotest-validate/Makefile
 CROSS_COMPILE = 
 
-INCLUDES = -I ../bme280-driver/
 
 ifeq ($(CC),)
 	CC ?= $(CROSS_COMPILE)gcc
