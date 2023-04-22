@@ -235,7 +235,7 @@ int bme280_init_module(void)
     }
     
     // Get the I2C adapter (master handle)
-    bme280_device.bme280_i2c_adapter = i2c_get_adapter(0); //todo: Check 
+    bme280_device.bme280_i2c_adapter = i2c_get_adapter(1); //todo: Check 
     if(bme280_device.bme280_i2c_adapter == NULL)
     {
         printk(KERN_ERR "Failed to get I2C adapter\n");
