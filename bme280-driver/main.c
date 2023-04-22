@@ -192,7 +192,7 @@ static uint8_t bme280_init_sensor(void)
     result = i2c_smbus_write_byte_data(bme280_device.bme280_i2c_client, BME280_CONFIG_REG_ADDR, (rmw_val & ~IIR_FILTER_BIT_MASK));
     if(result < 0)
     {
-        printk(KERN_ERR "Incorrect chip ID. Expected = %d, recieved = %d\n", BME280_CHIP_ID, chip_id);
+        printk(KERN_ERR "Coudn't write data to turn off IIR filter. Result = %d\n", result);
         retval = -1;
         goto exit_sensor_init;
     }
@@ -207,7 +207,7 @@ static uint8_t bme280_init_sensor(void)
 
     if(result < 0)
     {
-        printk(KERN_ERR "Incorrect chip ID. Expected = %d, recieved = %d\n", BME280_CHIP_ID, chip_id);
+        printk(KERN_ERR "Coudn't write data to set oversampling rate. Result = %d\n", result);
         retval = -1;
         goto exit_sensor_init;
     }
