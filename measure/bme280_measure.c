@@ -35,6 +35,8 @@ int main() {
         goto close_and_exit;
     }
 
+    printf("Value returned into the temperature buffer = %s\n", temp_buffer);
+
     // Convert temperature obtained in the buffer into int
     temperature = strtol(temp_buffer, &endptr, (LONG_SIGNED_INT_NUM - 1));
 
