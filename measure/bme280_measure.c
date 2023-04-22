@@ -18,7 +18,7 @@ int main() {
     char *endptr;
 
     // Open I2C device file
-    bme280_dev_fd = open(BME280_DEV, O_RDWR);
+    bme280_dev_fd = open(BME280_DEV, O_CREAT| O_RDWR, 0744);
 
     if (bme280_dev_fd < 0) 
     {
