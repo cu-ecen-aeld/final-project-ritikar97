@@ -11,7 +11,7 @@ ifeq ($(CFLAGS),)
 endif
 
 ifeq ($(LDFLAGS),)
-	LDFLAGS ?= -lmosquitto -lrt
+	LDFLAGS ?= -lmosquitto -pthread
 endif
 
 SRC ?= mqtt_sub_rpi.c
