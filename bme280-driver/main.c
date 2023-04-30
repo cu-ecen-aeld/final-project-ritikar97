@@ -107,8 +107,8 @@ static long unsigned int bme280_temp_read(void)
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR + 2) >> 4);
 
     dig_T1_val = (((bme280_device.calib_data[dig_T1 + 1]) << 8) | (bme280_device.calib_data[dig_T1]));
-    dig_T2_val = (((bme280_device.calib_data[(2 << dig_T2) + 1]) << 8) | (bme280_device.calib_data[(2 << dig_T2)]));
-    dig_T3_val = (((bme280_device.calib_data[(2 << dig_T3) + 1]) << 8) | (bme280_device.calib_data[(2 << dig_T3)]));
+    dig_T2_val = (((bme280_device.calib_data[(1 << dig_T2) + 1]) << 8) | (bme280_device.calib_data[(1 << dig_T2)]));
+    dig_T3_val = (((bme280_device.calib_data[(1 << dig_T3) + 1]) << 8) | (bme280_device.calib_data[(1 << dig_T3)]));
 
     // Compensation for possible errors in sensor data
     // Reference for logic: BME280 Datasheet
