@@ -19,7 +19,7 @@ TARGET ?= mqtt_sub_rpi
 all: $(TARGET)
 
 $(TARGET) : ${SRC}
-	$(CC) $(CFLAGS) ${SRC} -o ${TARGET} $(LDFLAGS)
+	$(CC) $(CFLAGS) ${SRC} -o ${TARGET} -lpaho-mqtt3c -pthread
 
 clean:
 	rm -f *.o ${TARGET}

@@ -27,6 +27,7 @@
 #define CALIB_DATA_T_LEN (6)
 #define TEMP_REG_ADDR (0xFA)
 #define BME280_SENSOR_ADDR (0x77)
+#define BME280_STATUS_REG_ADDR (0xF3)
 #define BME280_CHIP_ID_REG_ADDR (0xD0)
 #define BME280_CHIP_ID (0x60)
 #define BME280_CONFIG_REG_ADDR (0xF5)
@@ -35,6 +36,8 @@
 #define MODE_LSB (0)
 #define OSRS_P_LSB (2) 
 #define OSRS_T_LSB (5)
+#define SLEEP_MASK (0xFC)
+#define MEASUREMENT_IN_PROGRESS (0x00001001)
 
 
 int bme280_major =   0; // use dynamic major
@@ -101,6 +104,20 @@ static long unsigned int bme280_temp_read(void)
 {
     long signed int adc_T = 0, var1, var2, T;
     unsigned short dig_T1_val, dig_T2_val, dig_T3_val;
+    int rmw_val;
+    int result = 0;
+
+    // Force a reading
+    rmw_val = i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR);
+    result = i2c_smbus_write_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR, (rmw_val | (1 << MODE_LSB)));
+
+    if(result < 0)
+    {
+        printk(KERN_ERR "Coudn't write data to force reading Result = %d\n", result);
+        return -1;
+    }
+
+    while(!(i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, BME280_STATUS_REG_ADDR) & MEASUREMENT_IN_PROGRESS));
 
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR) << 12);
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR + 1) << 4);
@@ -112,13 +129,10 @@ static long unsigned int bme280_temp_read(void)
 
     // Compensation for possible errors in sensor data
     // Reference for logic: BME280 Datasheet
-    /* var1 = (((adc_T >> 3) - ((long signed int) dig_T1_val << 1)) * ((long signed int) dig_T2_val)) >> 11;
+    var1 = (((adc_T >> 3) - ((long signed int) dig_T1_val << 1)) * ((long signed int) dig_T2_val)) >> 11;
     var2 = (((((adc_T >> 4) - ((long signed int) dig_T1_val)) * ((adc_T >> 4) - ((long signed int) dig_T1_val))) >> 12) *
-        ((long signed int) dig_T3_val)) >> 14;*/
+        ((long signed int) dig_T3_val)) >> 14;
 
-    var1 = ((((adc_T>>3) - ((long int signed)dig_T1_val<<1))) * ((long int signed)dig_T2_val)) >> 11;
-    var2 = (((((adc_T>>4) - ((long int signed)dig_T1_val)) * ((adc_T>>4) - ((long int signed)dig_T1_val))) >> 12) *
-    ((long int signed)dig_T3_val)) >> 14;   
 
     T = ((var1 + var2) * 5 + 128) >> 8;
     return T;
@@ -132,6 +146,12 @@ ssize_t bme280_read(struct file *filp, char __user *buf, size_t count,
     ssize_t retval = 0;
 
     long signed int bme280_temperature_val = bme280_temp_read();
+
+    if(bme280_temperature_val == -1)
+    {
+        printk(KERN_ERR "Coudn't read temperature value. Error = %ld\n", bme280_temperature_val);
+        return 0;
+    }
 
     char temp[LONG_SIGNED_INT_NUM];
 
@@ -206,9 +226,10 @@ static uint8_t bme280_init_sensor(void)
     // Set oversampling rate
     // Temp x 1
     // Pressure x 0
-    // Mode = 01 for forced mode
+    // Mode = SLEEP initially
     rmw_val = 0;
-    rmw_val |= ((1 << OSRS_T_LSB) | (1 << MODE_LSB));
+    rmw_val |= (1 << OSRS_T_LSB);
+    rmw_val &= ~SLEEP_MASK;
     result = i2c_smbus_write_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR, rmw_val);
 
     if(result < 0)
