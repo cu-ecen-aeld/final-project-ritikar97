@@ -1,7 +1,6 @@
 # References : ../examples/autotest-validate/Makefile
 CROSS_COMPILE = 
 
-
 ifeq ($(CC),)
 	CC ?= $(CROSS_COMPILE)gcc
 endif
