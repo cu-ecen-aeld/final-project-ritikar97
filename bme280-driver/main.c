@@ -116,8 +116,8 @@ static long unsigned int bme280_temp_read(void)
     var2 = (((((adc_T >> 4) - ((long signed int) dig_T1_val)) * ((adc_T >> 4) - ((long signed int) dig_T1_val))) >> 12) *
         ((long signed int) dig_T3_val)) >> 14;*/
 
-    var1 = ((((adc_T>>3) – ((long int signed)dig_T1_val<<1))) * ((long int signed)dig_T2_val)) >> 11;
-    var2 = (((((adc_T>>4) – ((long int signed)dig_T1_val)) * ((adc_T>>4) – ((long int signed)dig_T1_val))) >> 12) *
+    var1 = ((((adc_T>>3) - ((long int signed)dig_T1_val<<1))) * ((long int signed)dig_T2_val)) >> 11;
+    var2 = (((((adc_T>>4) - ((long int signed)dig_T1_val)) * ((adc_T>>4) - ((long int signed)dig_T1_val))) >> 12) *
     ((long int signed)dig_T3_val)) >> 14;   
 
     T = ((var1 + var2) * 5 + 128) >> 8;
