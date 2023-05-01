@@ -62,7 +62,7 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
     printf("Topic: %s\n", topicName);
     printf("Message: %.*s\n", message->payloadlen, (char*)message->payload);
 
-    if(!(memcmp(message, MESSAGE, sizeof(MESSAGE))))
+    if(!(memcmp((char*)message -> payload, MESSAGE, sizeof(MESSAGE))))
     {
         // Read temperature from BME280 sensor
         num_bytes_read = read(bme280_dev_fd, measurements, MEASUREMENT_LEN);
