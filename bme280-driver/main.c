@@ -132,11 +132,11 @@ static long unsigned int bme280_pressure_read(void)
     var1 = ((var1 * var1 * (long long signed int)dig_P3_val) >> 8) + ((var1 * (long long signed int)dig_P2_val) << 12);
     var1 = (((((long long signed int)1) << 47) + var1)) * ((long long signed int)dig_P1_val) >> 33;
 
-    if (var1 == 0)
+    /*if (var1 == 0)
     {
         printk(KERN_ERR "Value of tFine = %lu and var1 = %lld", tFine, var1);
         return -1;
-    }
+    }*/
     
     P = P_CALC_2 - adc_P;
     P = (((P << 31) - var2) * 3125);
