@@ -26,6 +26,7 @@
 #define CALIB_ADDR (0x88)
 #define CALIB_DATA_T_LEN (6)
 #define TEMP_REG_ADDR (0xFA)
+#define PRESSURE_REG_ADDR (0xF7)
 #define BME280_SENSOR_ADDR (0x77)
 #define BME280_STATUS_REG_ADDR (0xF3)
 #define BME280_CHIP_ID_REG_ADDR (0xD0)
@@ -38,6 +39,8 @@
 #define OSRS_T_LSB (5)
 #define SLEEP_MASK (0xFC)
 #define MEASUREMENT_IN_PROGRESS (0x00001001)
+#define P_CALC (128000)
+#define P_CALC_2 (1048576)
 
 
 int bme280_major =   0; // use dynamic major
@@ -47,6 +50,7 @@ MODULE_AUTHOR("Ritika Ramchandani");
 MODULE_LICENSE("Dual BSD/GPL");
 
 struct bme280_dev bme280_device;
+long signed int tFine;
 
 // Define and initialize the i2c_driver struct
 static struct i2c_driver bme280_i2c_driver = 
@@ -100,25 +104,54 @@ static void get_calibration_data(void)
 }
 
 
-static long unsigned int bme280_temp_read(void)
+static long unsigned int bme280_pressure_read(void)
+{
+    long long signed int var1, var2, P;
+    long signed int adc_P = 0;
+    unsigned short dig_P1_val, dig_P2_val, dig_P3_val, dig_P4_val, dig_P5_val, dig_P6_val, dig_P7_val, dig_P8_val, dig_P9_val;
+
+    adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR) << 12);
+    adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR + 1) << 4);
+    adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR + 2) >> 4);
+
+    dig_P1_val = (((bme280_device.calib_data[(dig_P1 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P1 << 1)]));
+    dig_P2_val = (((bme280_device.calib_data[(dig_P2 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P2 << 1)]));
+    dig_P3_val = (((bme280_device.calib_data[(dig_P3 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P3 << 1)]));
+    dig_P4_val = (((bme280_device.calib_data[(dig_P4 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P4 << 1)]));
+    dig_P5_val = (((bme280_device.calib_data[(dig_P5 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P5 << 1)]));
+    dig_P6_val = (((bme280_device.calib_data[(dig_P6 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P6 << 1)]));
+    dig_P7_val = (((bme280_device.calib_data[(dig_P7 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P7 << 1)]));
+    dig_P8_val = (((bme280_device.calib_data[(dig_P8 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P8 << 1)]));
+    dig_P9_val = (((bme280_device.calib_data[(dig_P9 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P9 << 1)]));
+
+    // Reference BME280 datasheet
+    var1 = ((long long signed int)tFine) - P_CALC;
+    var2 = var1 * var1 * ((long long signed int)dig_P6_val);
+    var2 = var2 + ((var1 * (long long signed int)dig_P5_val) << 17);
+    var2 = var2 + (((long long signed int)dig_P4_val) << 35);
+    var1 = ((var1 * var1 * (long long signed int)dig_P3_val) >> 8) + ((var1 * (long long signed int)dig_P2_val) << 12);
+    var1 = (((((long long signed int)1) << 47) + var1)) * ((long long signed int)dig_P1_val) >> 33;
+
+    if (var1 == 0)
+    {
+      return -1;
+    }
+    
+    P = P_CALC_2 - adc_P;
+    P = (((P << 31) - var2) * 3125) / var1;
+    var1 = (((long long signed int)dig_P9_val) * (P >> 13) * (P >> 13)) >> 25;
+    var2 = (((long long signed int)dig_P8_val) * P) >> 19;
+    P = ((P + var1 + var2) >> 8) + (((long long signed int)dig_P7_val) << 4);
+
+    return (long unsigned int)P;
+
+}
+
+
+static long signed int bme280_temp_read(void)
 {
     long signed int adc_T = 0, var1, var2, T;
     unsigned short dig_T1_val, dig_T2_val, dig_T3_val;
-    int rmw_val;
-    int result = 0;
-
-    // Force a reading
-    rmw_val = i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR);
-    result = i2c_smbus_write_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR, (rmw_val | (1 << MODE_LSB)));
-
-    if(result < 0)
-    {
-        printk(KERN_ERR "Coudn't write data to force reading Result = %d\n", result);
-        return -1;
-    }
-
-    // Wait while a measurement is in progress
-    while(!(i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, BME280_STATUS_REG_ADDR) & MEASUREMENT_IN_PROGRESS));
 
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR) << 12);
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR + 1) << 4);
@@ -134,8 +167,8 @@ static long unsigned int bme280_temp_read(void)
     var2 = (((((adc_T >> 4) - ((long signed int) dig_T1_val)) * ((adc_T >> 4) - ((long signed int) dig_T1_val))) >> 12) *
         ((long signed int) dig_T3_val)) >> 14;
 
-
-    T = ((var1 + var2) * 5 + 128) >> 8;
+    tFine = var1 + var2;
+    T = (tFine * 5 + 128) >> 8;
     return T;
 }
 
@@ -143,23 +176,44 @@ static long unsigned int bme280_temp_read(void)
 ssize_t bme280_read(struct file *filp, char __user *buf, size_t count,
                 loff_t *f_pos)
 {
-    ssize_t num_bytes_read = LONG_SIGNED_INT_NUM;
+    long signed int bme280_temperature_val;
+    long unsigned int bme280_pressure_val;
+    ssize_t num_bytes_read = MEASUREMENT_LEN;
     ssize_t retval = 0;
+    int rmw_val;
+    char measurements[MEASUREMENT_LEN];
 
-    long signed int bme280_temperature_val = bme280_temp_read();
+    // Force a reading
+    rmw_val = i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR);
+    retval = i2c_smbus_write_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR, (rmw_val | (1 << MODE_LSB)));
 
-    if(bme280_temperature_val == -1)
+    if(retval < 0)
     {
-        printk(KERN_ERR "Coudn't read temperature value. Error = %ld\n", bme280_temperature_val);
+        printk(KERN_ERR "Coudn't write data to force reading Result = %ld\n", retval);
+        return -1;
+    }
+
+    // Wait while a measurement is in progress
+    while(!(i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, BME280_STATUS_REG_ADDR) & MEASUREMENT_IN_PROGRESS));
+
+    bme280_temperature_val = bme280_temp_read();
+
+
+    sprintf(measurements, "%ld", bme280_temperature_val);
+
+    // Read Pressure value
+    bme280_pressure_val = bme280_pressure_read();
+    if(bme280_pressure_val == -1)
+    {
+        printk(KERN_ERR "Coudn't read pressure value. Error = %ld\n", bme280_pressure_val);
         return 0;
     }
 
-    char temp[LONG_SIGNED_INT_NUM];
+    sprintf(measurements + LONG_SIGNED_INT_NUM - 1, "%lu", bme280_pressure_val);
 
-    sprintf(temp, "%ld", bme280_temperature_val);
 
     // Copy the entry from the specified offset to the user-provided buffer
-    if(copy_to_user(buf, temp, LONG_SIGNED_INT_NUM))
+    if(copy_to_user(buf, measurements, MEASUREMENT_LEN))
     {
         retval = -EFAULT;
         goto exit_gracefully;
@@ -226,10 +280,10 @@ static uint8_t bme280_init_sensor(void)
 
     // Set oversampling rate
     // Temp x 1
-    // Pressure x 0
+    // Pressure x 1
     // Mode = SLEEP initially
     rmw_val = 0;
-    rmw_val |= (1 << OSRS_T_LSB);
+    rmw_val |= ((1 << OSRS_T_LSB) | (1 << OSRS_P_LSB));
     rmw_val &= ~SLEEP_MASK;
     result = i2c_smbus_write_byte_data(bme280_device.bme280_i2c_client, BME280_CTRL_MEAS_REG_ADDR, rmw_val);
 

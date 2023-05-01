@@ -9,6 +9,7 @@
 
 #define BME280_DEV          "/dev/bme280"
 #define LONG_SIGNED_INT_NUM (11)
+#define MEASUREMENT_LEN     (21)
 #define ADDRESS             "tcp://10.0.0.46:1883"
 #define CLIENT_ID           "AESD Subscriber"
 #define TOPIC               "Measure"
@@ -19,9 +20,10 @@ int bme280_dev_fd; // File descriptor for bme280
 
 int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
-    char temp_buffer[LONG_SIGNED_INT_NUM];
+    char measurements[MEASUREMENT_LEN];
     uint8_t num_bytes_read = 0;
     long signed int temperature;
+    long unsigned int pressure;
     char *endptr;
 
     printf("Message arrived\n");
@@ -31,7 +33,7 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
     if(!(memcmp(topicName, TOPIC, sizeof(TOPIC))))
     {
         // Read temperature from BME280 sensor
-        num_bytes_read = read(bme280_dev_fd, temp_buffer, LONG_SIGNED_INT_NUM);
+        num_bytes_read = read(bme280_dev_fd, measurements, MEASUREMENT_LEN);
         if (num_bytes_read < 0) 
         {
             perror("Failed to read temperature from BME280 sensor");
@@ -41,7 +43,10 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
         //printf("Value returned into the temperature buffer = %s\n", temp_buffer);
 
         // Convert temperature obtained in the buffer into int
-        temperature = strtol(temp_buffer, &endptr, (LONG_SIGNED_INT_NUM - 1));
+        temperature = strtol(measurements, &endptr, (LONG_SIGNED_INT_NUM - 1));
+
+        // Convert pressure into unsigned int
+        pressure = strtoul(measurements + LONG_SIGNED_INT_NUM - 1, &endptr, (LONG_SIGNED_INT_NUM - 1));
 
         if(errno || (*endptr != '\0'))
         {
@@ -51,6 +56,9 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
 
         // Print temperature
         printf("Temperature: %ld.%ldC\n", temperature/100, temperature % 100);
+
+        // Print Pressure
+        printf("Pressure: %lu\n", pressure);
     }
 
     //MQTTClient_freeMessage(&message);

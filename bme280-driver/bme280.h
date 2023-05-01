@@ -30,7 +30,8 @@
 #include <linux/i2c.h>
 
 #define CALIB_DATA_PT_LEN (24)
-#define LONG_SIGNED_INT_NUM (11)
+#define LONG_SIGNED_INT_NUM (1)
+#define MEASUREMENT_LEN (21)
 
 // Only for Temperature and Pressure
 enum calib_data_digits
@@ -43,6 +44,7 @@ enum calib_data_digits
     dig_P3,
     dig_P4,
     dig_P5,
+    dig_P6,
     dig_P7,
     dig_P8,
     dig_P9
