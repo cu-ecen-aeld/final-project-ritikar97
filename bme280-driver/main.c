@@ -134,7 +134,8 @@ static long unsigned int bme280_pressure_read(void)
 
     if (var1 == 0)
     {
-      return -1;
+        printk(KERN_ERR "Value of tFine = %lu and var1 = %lld", tFine, var1);
+        return -1;
     }
     
     P = P_CALC_2 - adc_P;
