@@ -96,7 +96,7 @@ static void get_calibration_data(void)
 {
     int ret_val = 0;
 
-    ret_val = i2c_smbus_read_i2c_block_data(bme280_device.bme280_i2c_client, CALIB_ADDR, CALIB_DATA_T_LEN, &bme280_device.calib_data[0]);
+    ret_val = i2c_smbus_read_i2c_block_data(bme280_device.bme280_i2c_client, CALIB_ADDR, CALIB_DATA_PT_LEN, &bme280_device.calib_data[0]);
     if(ret_val != CALIB_DATA_T_LEN)
     {
         printk(KERN_ERR "Error reading calib data = %d\n", ret_val);
@@ -115,15 +115,16 @@ static long unsigned int bme280_pressure_read(void)
     adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR + 1) << 4);
     adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR + 2) >> 4);
 
-    dig_P1_val = (((bme280_device.calib_data[7]) << 8) | (bme280_device.calib_data[6]));
-    dig_P2_val = (((bme280_device.calib_data[9]) << 8) | (bme280_device.calib_data[8]));
-    dig_P3_val = (((bme280_device.calib_data[11]) << 8) | (bme280_device.calib_data[10]));
-    dig_P4_val = (((bme280_device.calib_data[13]) << 8) | (bme280_device.calib_data[12]));
-    dig_P5_val = (((bme280_device.calib_data[15]) << 8) | (bme280_device.calib_data[14]));
-    dig_P6_val = (((bme280_device.calib_data[17]) << 8) | (bme280_device.calib_data[16]));
-    dig_P7_val = (((bme280_device.calib_data[19]) << 8) | (bme280_device.calib_data[18]));
-    dig_P8_val = (((bme280_device.calib_data[21]) << 8) | (bme280_device.calib_data[20]));
-    dig_P9_val = (((bme280_device.calib_data[23]) << 8) | (bme280_device.calib_data[22]));
+    dig_P1_val = (((bme280_device.calib_data[(dig_P1 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P1 << 1)]));
+    dig_P2_val = (((bme280_device.calib_data[(dig_P2 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P2 << 1)]));
+    dig_P3_val = (((bme280_device.calib_data[(dig_P3 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P3 << 1)]));
+    dig_P4_val = (((bme280_device.calib_data[(dig_P4 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P4 << 1)]));
+    dig_P5_val = (((bme280_device.calib_data[(dig_P5 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P5 << 1)]));
+    dig_P6_val = (((bme280_device.calib_data[(dig_P6 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P6 << 1)]));
+    dig_P7_val = (((bme280_device.calib_data[(dig_P7 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P7 << 1)]));
+    dig_P8_val = (((bme280_device.calib_data[(dig_P8 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P8 << 1)]));
+    dig_P9_val = (((bme280_device.calib_data[(dig_P9 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P9 << 1)]));
+
 
     // Reference BME280 datasheet
     var1 = ((long long signed int)tFine) - P_CALC;
