@@ -170,7 +170,7 @@ static long signed int bme280_temp_read(void)
 
     tFine = var1 + var2;
 
-    printl(KERN_DEBUG "Value of tFine = %ld\n", tFine);
+    printk(KERN_DEBUG "Value of tFine = %ld\n", tFine);
     T = (tFine * 5 + 128) >> 8;
     return T;
 }
