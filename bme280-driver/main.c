@@ -138,7 +138,8 @@ static long unsigned int bme280_pressure_read(void)
     }
     
     P = P_CALC_2 - adc_P;
-    P = (((P << 31) - var2) * 3125) / var1;
+    P = (((P << 31) - var2) * 3125);
+    do_div(P, var1);
     var1 = (((long long signed int)dig_P9_val) * (P >> 13) * (P >> 13)) >> 25;
     var2 = (((long long signed int)dig_P8_val) * P) >> 19;
     P = ((P + var1 + var2) >> 8) + (((long long signed int)dig_P7_val) << 4);
