@@ -83,7 +83,9 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
         printf("Pressure: %lu.%luhPa\n", pressure/256, pressure % 256);
     }
 
-    return 0;
+    MQTTClient_freeMessage(&message);
+
+    return 1;
 }
 
 
