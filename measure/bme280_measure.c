@@ -8,8 +8,7 @@
 #include "MQTTClient.h"
 
 #define BME280_DEV          "/dev/bme280"
-#define LONG_SIGNED_INT_NUM (11)
-#define MEASUREMENT_LEN     (21)
+#define MEASUREMENT_LEN     (25)
 #define ADDRESS             "tcp://10.0.0.46:1883"
 #define CLIENT_ID           "AESD Subscriber"
 #define TOPIC               "Measure"
@@ -39,31 +38,15 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
             return -1;
         }
 
-        //printf("Value returned into the temperature buffer = %s\n", temp_buffer);
-
-        // Convert temperature obtained in the buffer into int
-        /*temperature = strtol(measurements, &endptr, (LONG_SIGNED_INT_NUM - 1));
-
-        // Convert pressure into unsigned int
-        pressure = strtoul(measurements + LONG_SIGNED_INT_NUM - 1, &endptr, (LONG_SIGNED_INT_NUM - 1));
-
-        if(errno || (*endptr != '\0'))
-        {
-            perror("Failed to convert string to a numerical value");
-            return -1;
-        }*/
-
         sscanf(measurements, "%ld %lu", &temperature, &pressure);
 
         // Print temperature
         printf("Temperature: %ld.%ldC\n", temperature/100, temperature % 100);
 
         // Print Pressure
-        printf("Pressure: %lu\n", pressure);
+        pressure = pressure / 100;
+        printf("Pressure: %lu.%luhPa\n", pressure/256, pressure % 256);
     }
-
-    //MQTTClient_freeMessage(&message);
-    //MQTTClient_free(topicName);
 
     return 0;
 }
