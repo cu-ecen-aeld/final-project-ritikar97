@@ -206,8 +206,6 @@ ssize_t bme280_read(struct file *filp, char __user *buf, size_t count,
     bme280_temperature_val = bme280_temp_read();
 
 
-    sprintf(measurements, "%ld", bme280_temperature_val);
-
     // Read Pressure value
     bme280_pressure_val = bme280_pressure_read();
     if(bme280_pressure_val == -1)
@@ -216,7 +214,7 @@ ssize_t bme280_read(struct file *filp, char __user *buf, size_t count,
         return 0;
     }
 
-    sprintf(measurements + LONG_SIGNED_INT_NUM - 1, "%lu", bme280_pressure_val);
+    snprintf(measurements, sizeof(measurements), "%ld %lu", bme280_temperature_val, bme280_pressure_val);
 
 
     // Copy the entry from the specified offset to the user-provided buffer

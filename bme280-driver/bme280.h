@@ -31,7 +31,7 @@
 
 #define CALIB_DATA_PT_LEN (24)
 #define LONG_SIGNED_INT_NUM (1)
-#define MEASUREMENT_LEN (21)
+#define MEASUREMENT_LEN (25)
 
 // Only for Temperature and Pressure
 enum calib_data_digits

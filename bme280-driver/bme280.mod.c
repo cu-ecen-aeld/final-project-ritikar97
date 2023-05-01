@@ -36,7 +36,6 @@ __used __section("__versions") = {
 	{ 0xe76d7921, "i2c_smbus_write_byte_data" },
 	{ 0xc4847533, "i2c_put_adapter" },
 	{ 0x6091b333, "unregister_chrdev_region" },
-	{ 0x3c3ff9fd, "sprintf" },
 	{ 0x6b10bee1, "_copy_to_user" },
 	{ 0x5b8239ca, "__x86_return_thunk" },
 	{ 0xefa56918, "i2c_new_client_device" },
@@ -46,6 +45,7 @@ __used __section("__versions") = {
 	{ 0xd0da656b, "__stack_chk_fail" },
 	{ 0x92997ed8, "_printk" },
 	{ 0xbdfb6dbb, "__fentry__" },
+	{ 0x656e4a6e, "snprintf" },
 	{ 0x3ae4522f, "i2c_get_adapter" },
 	{ 0xe3ec2f2b, "alloc_chrdev_region" },
 };
@@ -53,4 +53,4 @@ __used __section("__versions") = {
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "B71CB8EA79F175670F5A3D1");
+MODULE_INFO(srcversion, "43E6883BCA82CBB30FF8E80");

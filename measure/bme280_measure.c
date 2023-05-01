@@ -24,7 +24,6 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
     uint8_t num_bytes_read = 0;
     long signed int temperature;
     long unsigned int pressure;
-    char *endptr;
 
     printf("Message arrived\n");
     printf("Topic: %s\n", topicName);
@@ -43,7 +42,7 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
         //printf("Value returned into the temperature buffer = %s\n", temp_buffer);
 
         // Convert temperature obtained in the buffer into int
-        temperature = strtol(measurements, &endptr, (LONG_SIGNED_INT_NUM - 1));
+        /*temperature = strtol(measurements, &endptr, (LONG_SIGNED_INT_NUM - 1));
 
         // Convert pressure into unsigned int
         pressure = strtoul(measurements + LONG_SIGNED_INT_NUM - 1, &endptr, (LONG_SIGNED_INT_NUM - 1));
@@ -52,7 +51,9 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
         {
             perror("Failed to convert string to a numerical value");
             return -1;
-        }
+        }*/
+
+        sscanf(measurements, "%ld %lu", &temperature, &pressure);
 
         // Print temperature
         printf("Temperature: %ld.%ldC\n", temperature/100, temperature % 100);
