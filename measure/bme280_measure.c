@@ -53,8 +53,8 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
         printf("Temperature: %ld.%ldC\n", temperature/100, temperature % 100);
     }
 
-    MQTTClient_freeMessage(&message);
-    MQTTClient_free(topicName);
+    //MQTTClient_freeMessage(&message);
+    //MQTTClient_free(topicName);
 
     return 0;
 }
