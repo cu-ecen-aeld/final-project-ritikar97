@@ -1,3 +1,15 @@
+/**
+ * @file    bme280_measure.c
+ * @brief   Functions and data related to the BME280 driver implementation
+ *
+ * @author  Ritika Ramchandani
+ * @date    2023-04-12
+ * 
+ * @ref    BME280 GitHub repo by Bosch Sensortec GmbH
+ *         BME280 Datasheet 
+ *
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -17,6 +29,28 @@
 
 int bme280_dev_fd; // File descriptor for bme280
 
+/**
+ * @brief   Callback function when message is received by the MQTT Client
+ * 
+ * @param context A pointer to the <i>context</i> value originally passed to
+ * MQTTClient_setCallbacks(), which contains any application-specific context.
+ * 
+ * @param topicName The topic associated with the received message.
+ * 
+ * @param topicLen The length of the topic if there are one
+ * more NULL characters embedded in <i>topicName</i>, otherwise <i>topicLen</i>
+ * is 0. If <i>topicLen</i> is 0, the value returned by <i>strlen(topicName)</i>
+ * can be trusted. If <i>topicLen</i> is greater than 0, the full topic name
+ * can be retrieved by accessing <i>topicName</i> as a byte array of length
+ * <i>topicLen</i>.
+ * 
+ * @param message The MQTTClient_message structure for the received message.
+ * This structure contains the message payload and attributes.
+ * 
+ * @return This function must return 0 or 1 indicating whether or not
+ * the message has been safely received by the client application.
+ *
+*/
 int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
     char measurements[MEASUREMENT_LEN];
@@ -38,6 +72,7 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
             return -1;
         }
 
+        // Extract the values from the user buffer
         sscanf(measurements, "%ld %lu", &temperature, &pressure);
 
         // Print temperature
@@ -52,12 +87,24 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
 }
 
 
+/**
+ * @brief Callback when connection to the MQTT broker is lost
+ * 
+ * @param context A pointer to the <i>context</i> value originally passed to
+ * MQTTClient_setCallbacks(), which contains any application-specific context.
+ * 
+ * @param cause The reason for the disconnection.
+ * Currently, <i>cause</i> is always set to NULL.
+ */
 void connectionLost(void *context, char *cause)
 {
     printf("Connection lost due to %s\n", cause);
 }
 
 
+/**
+ * @brief main application point
+*/
 int main() 
 {
     int retval = 0;

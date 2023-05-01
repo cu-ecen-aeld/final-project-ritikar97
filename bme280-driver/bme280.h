@@ -1,8 +1,10 @@
-/*
- * bme280.h
+/**
+ * @file    bme280.h
+ * @brief   Functions and data related to the BME280 driver implementation
  *
- *  Created on: Apr 12, 2023
- *      Author: Ritika Ramchandani
+ * @author  Ritika Ramchandani
+ * @date    2023-04-12
+ *
  */
 
 #ifndef BME280_DRIVER_H_

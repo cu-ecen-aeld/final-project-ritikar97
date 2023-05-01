@@ -1,10 +1,12 @@
 /**
- * @file bme280.c
- * @brief Functions and data related to the BME280 driver implementation
+ * @file    bme280.c
+ * @brief   Functions and data related to the BME280 driver implementation
  *
- * @author Ritika Ramchandani
- * @date 2023-04-12
- * @copyright Copyright (c) 2019
+ * @author  Ritika Ramchandani
+ * @date    2023-04-12
+ * 
+ * @ref    BME280 GitHub repo by Bosch Sensortec GmbH
+ *         BME280 Datasheet 
  *
  */
 
@@ -72,6 +74,7 @@ struct i2c_board_info bme280_i2c_board =
 };
 
 
+// Function to open the device
 int bme280_open(struct inode *inode, struct file *filp)
 {
     struct bme280_dev* dev;
@@ -85,6 +88,7 @@ int bme280_open(struct inode *inode, struct file *filp)
 }
 
 
+// Function to close the device
 int bme280_release(struct inode *inode, struct file *filp)
 {
     PDEBUG("release");
@@ -92,18 +96,20 @@ int bme280_release(struct inode *inode, struct file *filp)
 }
 
 
+// Each measurement - temperature, pressure and humidity, requires certain calibration data already present in the registers
 static void get_calibration_data(void)
 {
     int ret_val = 0;
 
+    // Read preset calibration data
     ret_val = i2c_smbus_read_i2c_block_data(bme280_device.bme280_i2c_client, CALIB_ADDR, CALIB_DATA_PT_LEN, &bme280_device.calib_data[0]);
-    if(ret_val != CALIB_DATA_T_LEN)
+    if(ret_val != CALIB_DATA_PT_LEN)
     {
         printk(KERN_ERR "Error reading calib data = %d\n", ret_val);
     }
 }
 
-
+// Read the pressure
 static long unsigned int bme280_pressure_read(void)
 {
     long long signed int var1, var2, P;
@@ -111,10 +117,13 @@ static long unsigned int bme280_pressure_read(void)
     unsigned short dig_P1_val;
     signed short dig_P2_val, dig_P3_val, dig_P4_val, dig_P5_val, dig_P6_val, dig_P7_val, dig_P8_val, dig_P9_val;
 
+    // pres_msb - [19:12], pres_lsb - [11:4], pres_xlsb, [3:0]
     adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR) << 12);
     adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR + 1) << 4);
     adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR + 2) >> 4);
 
+    // Concatenate bytes read from calibration registers to get calibration digits
+    // Reference: GitHub repo of Bosch Sensortec
     dig_P1_val = (((bme280_device.calib_data[(dig_P1 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P1 << 1)]));
     dig_P2_val = (((bme280_device.calib_data[(dig_P2 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P2 << 1)]));
     dig_P3_val = (((bme280_device.calib_data[(dig_P3 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P3 << 1)]));
@@ -126,7 +135,7 @@ static long unsigned int bme280_pressure_read(void)
     dig_P9_val = (((bme280_device.calib_data[(dig_P9 << 1) + 1]) << 8) | (bme280_device.calib_data[(dig_P9 << 1)]));
 
 
-    // Reference BME280 datasheet
+    // Reference: BME280 datasheet
     var1 = ((long long signed int)tFine) - P_CALC;
     var2 = var1 * var1 * ((long long signed int)dig_P6_val);
     var2 = var2 + ((var1 * (long long signed int)dig_P5_val) << 17);
@@ -134,6 +143,7 @@ static long unsigned int bme280_pressure_read(void)
     var1 = ((var1 * var1 * (long long signed int)dig_P3_val) >> 8) + ((var1 * (long long signed int)dig_P2_val) << 12);
     var1 = (((((long long signed int)1) << 47) + var1)) * ((long long signed int)dig_P1_val) >> 33;
 
+    // Check for zero before dividing
     if (var1 == 0)
     {
         printk(KERN_ERR "Value of tFine = %lu and var1 = %lld", tFine, var1);
@@ -158,6 +168,7 @@ static long signed int bme280_temp_read(void)
     unsigned short dig_T1_val;
     signed short dig_T2_val, dig_T3_val;
 
+    // temp_msb - [19:12], temp_lsb - [11:4], temp_xlsb, [3:0]
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR) << 12);
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR + 1) << 4);
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR + 2) >> 4);
@@ -180,6 +191,7 @@ static long signed int bme280_temp_read(void)
 }
 
 
+// Read the values from the sensor for temperature and pressure
 ssize_t bme280_read(struct file *filp, char __user *buf, size_t count,
                 loff_t *f_pos)
 {
@@ -354,6 +366,7 @@ int bme280_init_module(void)
         unregister_chrdev_region(dev, 1);
     }
 
+    // Intialize the registers of the sensor
     bme280_init_sensor();
     PDEBUG("Initialized\n");
     goto only_exit;
