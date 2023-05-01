@@ -84,6 +84,7 @@ int checkMessage(void *context, char *topicName, int topicLen, MQTTClient_messag
     }
 
     MQTTClient_freeMessage(&message);
+    MQTTClient_free(topicName);
 
     return 1;
 }
