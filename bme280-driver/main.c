@@ -117,6 +117,7 @@ static long unsigned int bme280_temp_read(void)
         return -1;
     }
 
+    // Wait while a measurement is in progress
     while(!(i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, BME280_STATUS_REG_ADDR) & MEASUREMENT_IN_PROGRESS));
 
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR) << 12);

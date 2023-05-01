@@ -48,7 +48,7 @@ int main() {
     }
 
     // Print temperature
-    printf("Temperature: %ld\n", temperature);
+    printf("Temperature: %ld.%ldC\n", temperature/100, temperature % 100);
 
 close_and_exit:
     // Close I2C device file
