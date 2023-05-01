@@ -10,9 +10,7 @@ ifeq ($(CFLAGS),)
 	CFLAGS ?= -g -Wall -Werror ${INCLUDES}
 endif
 
-ifeq ($(LDFLAGS),)
-	LDFLAGS ?= -pthread -lrt -lpaho-mqtt3c
-endif
+LDFLAGS += -pthread -lrt -lpaho-mqtt3c
 
 SRC ?= bme280_measure.c
 TARGET ?= bme280_measure
@@ -20,7 +18,7 @@ TARGET ?= bme280_measure
 all: $(TARGET)
 
 $(TARGET) : ${SRC}
-	$(CC) $(CFLAGS) ${SRC} -o ${TARGET} $(LDFLAGS)
+	$(CC) $(CFLAGS) ${SRC} -o ${TARGET} $(LDFLAGS) 
 
 clean:
 	rm -f *.o ${TARGET}
