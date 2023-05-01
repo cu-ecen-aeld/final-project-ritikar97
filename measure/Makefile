@@ -6,12 +6,14 @@ ifeq ($(CC),)
 	CC ?= $(CROSS_COMPILE)gcc
 endif
 
+INCLUDES = -I/usr/local
+
 ifeq ($(CFLAGS),)
 	CFLAGS ?= -g -Wall -Werror ${INCLUDES}
 endif
 
 ifeq ($(LDFLAGS),)
-	LDFLAGS ?= -pthread -lrt
+	LDFLAGS ?= -pthread -lrt -lpaho-mqtt3c
 endif
 
 SRC ?= bme280_measure.c
