@@ -108,7 +108,8 @@ static long unsigned int bme280_pressure_read(void)
 {
     long long signed int var1, var2, P;
     long signed int adc_P = 0;
-    unsigned short dig_P1_val, dig_P2_val, dig_P3_val, dig_P4_val, dig_P5_val, dig_P6_val, dig_P7_val, dig_P8_val, dig_P9_val;
+    unsigned short dig_P1_val;
+    signed short dig_P2_val, dig_P3_val, dig_P4_val, dig_P5_val, dig_P6_val, dig_P7_val, dig_P8_val, dig_P9_val;
 
     adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR) << 12);
     adc_P |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, PRESSURE_REG_ADDR + 1) << 4);
@@ -132,11 +133,11 @@ static long unsigned int bme280_pressure_read(void)
     var1 = ((var1 * var1 * (long long signed int)dig_P3_val) >> 8) + ((var1 * (long long signed int)dig_P2_val) << 12);
     var1 = (((((long long signed int)1) << 47) + var1)) * ((long long signed int)dig_P1_val) >> 33;
 
-    /*if (var1 == 0)
+    if (var1 == 0)
     {
         printk(KERN_ERR "Value of tFine = %lu and var1 = %lld", tFine, var1);
         return -1;
-    }*/
+    }
     
     P = P_CALC_2 - adc_P;
     P = (((P << 31) - var2) * 3125);
@@ -153,7 +154,8 @@ static long unsigned int bme280_pressure_read(void)
 static long signed int bme280_temp_read(void)
 {
     long signed int adc_T = 0, var1, var2, T;
-    unsigned short dig_T1_val, dig_T2_val, dig_T3_val;
+    unsigned short dig_T1_val;
+    signed short dig_T2_val, dig_T3_val;
 
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR) << 12);
     adc_T |= (i2c_smbus_read_byte_data(bme280_device.bme280_i2c_client, TEMP_REG_ADDR + 1) << 4);
