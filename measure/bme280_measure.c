@@ -21,7 +21,7 @@
 
 #define BME280_DEV          "/dev/bme280"
 #define MEASUREMENT_LEN     (25)
-#define ADDRESS             "tcp://10.0.0.46:1883"
+#define ADDRESS             "tcp://broker.hivemq.com:1883"
 #define CLIENT_ID           "AESD Subscriber"
 #define TOPIC               "Measure"
 #define MESSAGE             "PBPressed"
